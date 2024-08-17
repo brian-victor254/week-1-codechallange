@@ -1,12 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Transaction.css";
 
-
 const Transaction = () => {
-  const [transactions, setTransactions] = useState(() => {
-    const storedTransactions = localStorage.getItem("transactions");
-    return storedTransactions ? JSON.parse(storedTransactions) : [];
-  });
+  const [transactions, setTransactions] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [newTransaction, setNewTransaction] = useState({
     date: "",
@@ -15,6 +11,25 @@ const Transaction = () => {
     amount: "",
   });
 
+  useEffect(() => {
+  
+    const fetchTransactions = async () => {
+      try {
+        const response = await fetch("/db.json");
+        const data = await response.json();
+        setTransactions(data.transactions || []);
+      } catch (error) {
+        console.error("Error fetching transactions:", error);
+      }
+    };
+
+    fetchTransactions();
+  }, []);
+
+  useEffect(() => {
+    
+    localStorage.setItem("transactions", JSON.stringify(transactions));
+  }, [transactions]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -42,16 +57,11 @@ const Transaction = () => {
   const filteredTransactions = searchTerm
     ? transactions.filter((transaction) =>
         transaction.description.toLowerCase().includes(searchTerm.toLowerCase())
-      ) 
-      
+      )
     : transactions;
 
-    React.useEffect(() => {
-      localStorage.setItem("transactions", JSON.stringify(transactions));
-    }, [transactions]);
-
   return (
-    // Search Bar 
+  
     <div className="container">
       <div className="search-container">
         <form className="search-box">
@@ -68,53 +78,52 @@ const Transaction = () => {
         </form>
       </div>
 
-      {/* // form */}
+    
       <div id="submit-form">
         <form onSubmit={addTransaction} className="input-box">
-         <div id= "input-box">
-         <input
-            id="date"
-            type="date"
-            name="date"
-            placeholder="Date"
-            className="form-input"
-            value={newTransaction.date}
-            onChange={handleInputChange}
-          />
-          <input
-            type="text"
-            name="description"
-            placeholder="Description"
-            className="form-input"
-            value={newTransaction.description}
-            onChange={handleInputChange}
-          />
-          <input
-            type="text"
-            name="category"
-            placeholder="Category"
-            className="form-input"
-            value={newTransaction.category}
-            onChange={handleInputChange}
-          />
-          <input
-            type="number"
-            name="amount"
-            placeholder="Amount"
-            className="form-input"
-            value={newTransaction.amount}
-            onChange={handleInputChange}
-          />
-         </div>
-         {/* // Button */}
+          <div id="input-box">
+            <input
+              id="date"
+              type="date"
+              name="date"
+              placeholder="Date"
+              className="form-input"
+              value={newTransaction.date}
+              onChange={handleInputChange}
+            />
+            <input
+              type="text"
+              name="description"
+              placeholder="Description"
+              className="form-input"
+              value={newTransaction.description}
+              onChange={handleInputChange}
+            />
+            <input
+              type="text"
+              name="category"
+              placeholder="Category"
+              className="form-input"
+              value={newTransaction.category}
+              onChange={handleInputChange}
+            />
+            <input
+              type="number"
+              name="amount"
+              placeholder="Amount"
+              className="form-input"
+              value={newTransaction.amount}
+              onChange={handleInputChange}
+            />
+          </div>
+      
           <div>
             <button type="submit" className="btn btn-primary">Add Transaction</button>
           </div>
         </form>
       </div>
 
-{/* 
-      // Display Table */}
+  
       <div className="table">
         <table className="table">
           <thead>
